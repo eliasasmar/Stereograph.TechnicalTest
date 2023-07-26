@@ -8,6 +8,9 @@ using Stereograph.TechnicalTest.Api.Models;
 using Stereograph.TechnicalTest.Api.Migrations;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Stereograph.TechnicalTest.Api.Controllers;
 
@@ -59,4 +62,30 @@ public class PersonController : ControllerBase
             return "Error";
         }
     }
+
+    [HttpPost]
+    [Route("persons/AddPerson")]
+    public async Task<ActionResult<List<Person>>> AddPerson(Person person)
+    {
+        try
+        {
+            person.personId = Guid.NewGuid();
+            _context.Persons.Add(person);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Persons.ToListAsync());
+        }catch(Exception ex)
+        {
+            return BadRequest(ex.ToString());
+        }
+
+    }
+
+    [HttpGet]
+    [Route("persons/GetPersons")]
+    public async Task<ActionResult<List<Person>>> GetPersons()
+    {
+        return Ok(await _context.Persons.ToListAsync());
+    }
+
 }
