@@ -100,4 +100,35 @@ public class PersonController : ControllerBase
         return Ok(person);
     }
 
+    [HttpPost]
+    [Route("persons/UpdatePerson")]
+    public ActionResult<Person> UpdatePerson(Person person)
+    {
+        try
+        {
+            var personExist = _context.Persons.Where(x => x.personId == person.personId).FirstOrDefault();
+            if (personExist == null)
+            {
+                return BadRequest("Person not found");
+            }
+            else
+            {
+                personExist.firstName = person.firstName;
+                personExist.lastName = person.lastName;
+                personExist.email = person.email;
+                personExist.address = person.address;
+                personExist.city = person.city;
+                _context.SaveChanges();
+
+                return Ok(person);
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.ToString());
+        }
+
+    }
+
 }
