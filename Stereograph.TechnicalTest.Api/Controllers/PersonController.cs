@@ -88,4 +88,16 @@ public class PersonController : ControllerBase
         return Ok(await _context.Persons.ToListAsync());
     }
 
+    [HttpGet]
+    [Route("persons/GetSinglePerson/{id}")]
+    public ActionResult<Person> GetSinglePerson(Guid id)
+    {
+        var person = _context.Persons.Where(person => person.personId == id).FirstOrDefault();
+        if (person == null)
+        {
+            return BadRequest("Person not found.");
+        }
+        return Ok(person);
+    }
+
 }
