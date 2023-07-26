@@ -7,6 +7,7 @@ using System.Linq;
 using Stereograph.TechnicalTest.Api.Models;
 using Stereograph.TechnicalTest.Api.Migrations;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Stereograph.TechnicalTest.Api.Controllers;
 
@@ -15,10 +16,12 @@ namespace Stereograph.TechnicalTest.Api.Controllers;
 public class PersonController : ControllerBase
 {
     private ApplicationDbContext _context;
+    private IConfiguration _configuration;
 
-    public PersonController(ApplicationDbContext context)
+    public PersonController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
     }
     [HttpGet]
     [Route("persons/GeneratePersons")]
@@ -26,29 +29,28 @@ public class PersonController : ControllerBase
     {
         try
         {
-            int counter = 0;
-            using (var streamReader = new StreamReader(@"C:\Users\Elias\Desktop\MyProjects\technique\TechnicalTestNetSkeleton\Stereograph.TechnicalTest.Api\Ressources\Persons.csv"))
+
+            string CSVPath = _configuration.GetValue<string>("MyConfig:PathCSV");
+            using (var streamReader = new StreamReader(CSVPath))
             {
                 using (var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture))
                 {
                     csvReader.Context.RegisterClassMap<PersonClassMap>();
                     var records = csvReader.GetRecords<Person>().ToList();
-                    
-                        foreach (var record in records)
-                        {
+
+                    foreach (var record in records)
+                    {
                         try
                         {
                             _context.Add(record);
                             _context.SaveChanges();
-                            counter++;
-                        }catch (Exception ex)
+                        }
+                        catch (Exception ex)
                         {
                             Console.WriteLine(ex.ToString());
                         }
-                        
-                        }
-                    
 
+                    }
                 }
             }
             return "Persons Created";
