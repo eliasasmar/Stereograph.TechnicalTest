@@ -35,13 +35,9 @@ namespace Stereograph.TechnicalTest.Api.Services
         }
         public Person AddPerson(Person person)
         {
-            //int k = 0;
-            //int i = 10;
-            //int j;
             person.personId = Guid.NewGuid();
             _context.Persons.Add(person);
             _context.SaveChangesAsync();
-            //j = i / k;
             return person;
         }
 

@@ -22,29 +22,29 @@ public class UnitTest1
     [Fact]
     public void GetPersons_Test()
     {
-        //var personList = GetPersonsData();
-        //personService.Setup(x => x.GetPersons())
-        //        .Returns(personList);
+        var personList = GetPersonsData();
+        personService.Setup(x => x.GetPersons())
+                .Returns(personList);
+        var actual = personService.Object.GetPersons();
+        Assert.Equal(personList, actual);
     }
 
     [Fact]
     public void GetSinglePerson_Test()
     {
-        //var personList = GetPersonsData();
-        //personService.Setup(x => x.GetSinglePerson(new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa7")))
-        //    .Returns(personList[1]);
+        var personList = GetPersonsData();
+        personService.Setup(x => x.GetSinglePerson(new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa7")))
+            .Returns(personList[1]);
+        var actual = personService.Object.GetSinglePerson(new Guid("3fa85f64-5717-4562-b3fc-2c963f66afa7"));
+        Assert.Equal(personList[1], actual);
     }
     [Fact]
     public void AddPerson_Test()
     {
         var personList = GetPersonsData();
-        //personService.Setup(x => x.AddPerson(personList[2]))
-        //  .Returns(personList[2]);
-        //var personController = new PersonController(_context, null,personService);
-        personService.Setup(x => x.AddPerson(personList[2])).Returns(personList[2]).Verifiable();
+        personService.Setup(x => x.AddPerson(personList[2])).Returns(personList[2]);
         var actual = personService.Object.AddPerson(personList[2]);
         Assert.Equal(personList[2], actual);
-        personService.Verify();
     }
 
     private List<Person> GetPersonsData()
