@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Stereograph.TechnicalTest.Api.Services;
 
 namespace Stereograph.TechnicalTest.Api.Controllers;
 
@@ -18,13 +19,14 @@ namespace Stereograph.TechnicalTest.Api.Controllers;
 [ApiController]
 public class PersonController : ControllerBase
 {
-    private ApplicationDbContext _context;
     private IConfiguration _configuration;
+    private IPersonService personService;
 
-    public PersonController(ApplicationDbContext context, IConfiguration configuration)
+    public PersonController(IConfiguration configuration, IPersonService _personService)
     {
-        _context = context;
         _configuration = configuration;
+        personService = _personService;
+        
     }
     [HttpGet]
     [Route("persons/GeneratePersons")]
@@ -45,8 +47,7 @@ public class PersonController : ControllerBase
                     {
                         try
                         {
-                            _context.Add(record);
-                            _context.SaveChanges();
+                            personService.AddRecordCSV(record);
                         }
                         catch (Exception ex)
                         {
@@ -65,34 +66,25 @@ public class PersonController : ControllerBase
 
     [HttpPost]
     [Route("persons/AddPerson")]
-    public async Task<ActionResult<List<Person>>> AddPerson(Person person)
+    public ActionResult<Person> AddPerson(Person person)
     {
-        try
-        {
-            person.personId = Guid.NewGuid();
-            _context.Persons.Add(person);
-            await _context.SaveChangesAsync();
-
-            return Ok(await _context.Persons.ToListAsync());
-        }catch(Exception ex)
-        {
-            return BadRequest(ex.ToString());
-        }
+            personService.AddPerson(person);
+            return Ok(person);
 
     }
 
     [HttpGet]
     [Route("persons/GetPersons")]
-    public async Task<ActionResult<List<Person>>> GetPersons()
+    public ActionResult<List<Person>> GetPersons()
     {
-        return Ok(await _context.Persons.ToListAsync());
+        return Ok(personService.GetPersons());
     }
 
     [HttpGet]
     [Route("persons/GetSinglePerson/{id}")]
     public ActionResult<Person> GetSinglePerson(Guid id)
     {
-        var person = _context.Persons.Where(person => person.personId == id).FirstOrDefault();
+        var person = personService.GetSinglePerson(id);
         if (person == null)
         {
             return BadRequest("Person not found.");
@@ -106,23 +98,40 @@ public class PersonController : ControllerBase
     {
         try
         {
-            var personExist = _context.Persons.Where(x => x.personId == person.personId).FirstOrDefault();
-            if (personExist == null)
+            var result = personService.UpdatePerson(person);
+            if (result == null)
             {
                 return BadRequest("Person not found");
             }
             else
             {
-                personExist.firstName = person.firstName;
-                personExist.lastName = person.lastName;
-                personExist.email = person.email;
-                personExist.address = person.address;
-                personExist.city = person.city;
-                _context.SaveChanges();
-
                 return Ok(person);
             }
             
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.ToString());
+        }
+
+    }
+
+    [HttpGet]
+    [Route("persons/DeletePerson/{id}")]
+    public ActionResult<String> DeletePerson(Guid id)
+    {
+        try
+        {
+            var result = personService.DeletePerson(id);
+            if (result == null)
+            {
+                return BadRequest("Person not found");
+            }
+            else
+            {
+                return Ok(result);
+            }
+
         }
         catch (Exception ex)
         {

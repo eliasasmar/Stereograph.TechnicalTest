@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
 using Stereograph.TechnicalTest.Api.Models;
+using Stereograph.TechnicalTest.Api.Services;
 using System;
 
 namespace Stereograph.TechnicalTest.Api;
@@ -39,6 +40,7 @@ public class Startup
 
         services
             .AddControllers();
+        services.AddTransient<IPersonService, PersonService>();
     }
 
     public void Configure(IApplicationBuilder application, IWebHostEnvironment environment)
